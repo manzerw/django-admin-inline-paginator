@@ -3,7 +3,7 @@ name: Build and publish to PyPI
 on:
   push:
     tags:
-      - '**'
+      - "**"
 
 jobs:
   code-quality:
@@ -12,7 +12,7 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yml
     needs: [code-quality]
-  
+
   # sonar:
   #   uses: ./.github/workflows/sonar.yml
   #   needs: [tests]

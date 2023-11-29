@@ -1,6 +1,6 @@
 from typing import Optional
 
-from django.contrib.admin import TabularInline
+from django.contrib.admin import StackedInline, TabularInline
 from django.contrib.admin.views.main import ChangeList
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.core.paginator import Paginator
@@ -10,14 +10,15 @@ from django.http import HttpRequest
 
 class InlineChangeList:
     """
-        Used by template to construct the paginator
+    Used by template to construct the paginator
     """
+
     can_show_all = True
     multi_page = True
-    get_query_string = ChangeList.__dict__['get_query_string']
+    get_query_string = ChangeList.__dict__["get_query_string"]
 
     def __init__(self, request: HttpRequest, page_num: int, paginator: Paginator):
-        self.show_all = 'all' in request.GET
+        self.show_all = "all" in request.GET
         self.page_num = page_num
         self.paginator = paginator
         self.result_count = paginator.count
@@ -28,12 +29,12 @@ class PaginationFormSetBase:
     queryset: Optional[QuerySet] = None
     request: Optional[HttpRequest] = None
     per_page = 20
-    pagination_key = 'page'
+    pagination_key = "page"
 
     def get_page_num(self) -> int:
         assert self.request is not None
-        page = self.request.GET.get(self.pagination_key, '1')
-        if page.isnumeric() and page > '0':
+        page = self.request.GET.get(self.pagination_key, "1")
+        if page.isnumeric() and page > "0":
             return int(page)
 
         return 1
@@ -62,9 +63,10 @@ class PaginationFormSetBase:
         self.mount_paginator()
         self.mount_queryset()
 
+
 class InlinePaginated:
-    pagination_key = 'page'
-    template = 'admin/tabular_paginated.html'
+    pagination_key = "page"
+    template = "admin/tabular_paginated.html"
     per_page = 20
     extra = 0
 
@@ -78,8 +80,14 @@ class InlinePaginated:
         PaginationFormSet.per_page = self.per_page
         return PaginationFormSet
 
+
+class StackedInlinePaginated(InlinePaginated, StackedInline):
+    template = "admin/stacked_paginated.html"
+
+
 class TabularInlinePaginated(InlinePaginated, TabularInline):
     pass
+
 
 class GenericTabularInlinePaginated(InlinePaginated, GenericTabularInline):
     pass
