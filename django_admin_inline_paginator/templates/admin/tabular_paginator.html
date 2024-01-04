@@ -2,44 +2,49 @@
 {% load paginated_inline %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'django_admin_inline_paginator/paginator.css' %}">
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <div>
-   {% with inline_admin_formset.formset.page as page_obj %}
-    <p class="paginator">
+  {% with inline_admin_formset.formset.page as page_obj %}
+    <p class="paginator" id="pagination-container">
       {% if page_obj.has_previous %}
-        <a href="?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key page_obj.previous_page_number %}">{% trans 'previous' %}</a>
-      {% endif %}
-
-      {% if page_obj.number|add:"-5" > 0 %}
-        <a class="btn-page page-available" href="?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key 0 %}">1</a>
-      {% endif %}
-
-      {% if page_obj.number|add:"-5" > 1 %}
-        <span>&hellip;</span>
+        <a href="#" class="btn-page page-link" data-page="{{ page_obj.previous_page_number }}">{% trans 'previous' %}</a>
       {% endif %}
 
       {% for page_num in page_obj.paginator.page_range %}
         {% if page_obj.number == page_num %}
           <span class="btn-page page-selected">{{ page_num }}</span>
         {% else %}
-          {% if page_num > page_obj.number|add:"-5" and page_num < page_obj.number|add:"5" %}
-            <a class="btn-page page-available" href="?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key page_num %}">{{ page_num }}</a>
-          {% endif %}
+          <a href="#" class="btn-page page-link" data-page="{{ page_num }}">{{ page_num }}</a>
         {% endif %}
       {% endfor %}
 
-      {% if page_obj.number|add:"5" < page_obj.paginator.num_pages %}
-        <span>&hellip;</span>
-      {% endif %}
-
-      {% if page_obj.number|add:"4" < page_obj.paginator.num_pages %}
-        <a class="btn-page page-available" href="?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
-      {% endif %}
-
       {% if page_obj.has_next %}
-        <a href="?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key page_obj.next_page_number %}">{% trans 'next' %}</a>
+        <a href="#" class="btn-page page-link" data-page="{{ page_obj.next_page_number }}">{% trans 'next' %}</a>
       {% endif %}
       <span class='btn-page results'>{{ page_obj.paginator.count }} Results</span>
     </p>
   {% endwith %}
 </div>
+
+<script>
+$(document).ready(function() {
+  $('#pagination-container').on('click', '.page-link', function(e) {
+    e.preventDefault();
+    var page = $(this).data('page');
+    var url = window.location.href.split('?')[0];  // Remove query parameters
+    var queryString = '?{% modify_pagination_path request.get_full_path inline_admin_formset.formset.pagination_key %}=' + page;
+
+    $.ajax({
+      type: 'GET',
+      url: url + queryString,
+      success: function(data) {
+        $('#your-content-container').html(data);  // Replace 'your-content-container' with the actual container ID or class
+      },
+      error: function(error) {
+        console.log('Error:', error);
+      }
+    });
+  });
+});
+</script>
